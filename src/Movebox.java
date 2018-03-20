@@ -53,7 +53,8 @@ public class Movebox {
         if (str.equals(target))
             return true;
         else
-            return (isSubstring(str, target.substring(0, target.length() - 1)));
+            return isSubstring(str, target.substring(0, target.length() - 1))
+                    || isSubstring(str, target.substring(1));
     }
 
     private char getInstruction() {
