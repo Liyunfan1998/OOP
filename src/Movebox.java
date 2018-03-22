@@ -5,12 +5,13 @@ import java.util.*;
 
 /**
  * Created by luke1998 on 2018/3/19.
+ * 还有一个box不能覆盖box的检查没做
  */
 public class Movebox {
 
     public static void main(String[] args) throws IOException {
         Movebox movebox = new Movebox();
-        String fileName = "./maps/1.map";
+        String fileName = "./maps/2.map";
         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
         int[] size = Map.getMapSize(bufferedReader, 2);
         int n = size[0];
@@ -37,19 +38,18 @@ public class Movebox {
 
     public boolean checkWin(Map m) {
         List<int[]> bij = new ArrayList(Arrays.asList(m.getBoxesIJ()));
-        int x = bij.size();
         List<int[]> dij = new ArrayList(Arrays.asList(m.getDestsIJ()));
 
-        Iterator<int[]> iterator = bij.iterator();
+        Iterator<int[]> iterator = dij.iterator();
         while (iterator.hasNext()) {
-            int[] nextbij = iterator.next();
-            for (int[] dd : dij) {
-                if (Arrays.equals(nextbij, dd)) {
+            int[] nextdij = iterator.next();
+            for (int[] bb : bij) {
+                if (Arrays.equals(nextdij, bb)) {
                     iterator.remove();
                 }
             }
         }
-        return bij.size() == 0;
+        return dij.size() == 0;
 
 //        for (int i = 0; i < x; i++) {
 //            int di = bij.get(i)[0] - dij.get(i)[0];
@@ -85,20 +85,20 @@ public class Movebox {
         HasIndexIJ[][] map = m.getMap();
         int[] pij = m.getPersonIJ();
         Person p = (Person) map[pij[0]][pij[1]];
-        Box b = new Box();
-        int[][] bijs = m.getBoxesIJ();
-        for (int i = 0; i < bijs.length; i++) {
-            int[] bij = bijs[i];
-            b = (Box) map[bij[0]][bij[1]];
-        }
-        go(m, direction, p, new Box());
+//        Box b = new Box();
+//        int[][] bijs = m.getBoxesIJ();
+//        for (int i = 0; i < bijs.length; i++) {
+//            int[] bij = bijs[i];
+//            b = (Box) map[bij[0]][bij[1]];
+//        }
+        go(m, direction, p);
     }
 
-    private void go(Map m, char direction, Person p, Box b) {
+    private void go(Map m, char direction, Person p) {
         if (!p.checkWall(m, direction)) {
             boolean pb = p.checkBox(m, direction);
             if (pb) {
-                b = p.getFrontBox(m, direction);
+                Box b = p.getFrontBox(m, direction);
 
                 boolean bw = b.checkWall(m, direction);
                 if (!bw) {
