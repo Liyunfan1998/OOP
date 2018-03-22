@@ -13,17 +13,18 @@ public class Movebox {
 
     public static void main(String[] args) throws IOException {
         Movebox movebox = new Movebox();
-        String fileName = "./maps/6.map";
+        String fileName = "./maps/3.map";
         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
         int[] size = Map.getMapSize(bufferedReader, 2);
-        int n = size[0];
+        int n = size[1];
+        int m = size[0];
 //        System.out.println(size[0]+""+size[1]);
-        int[][] intMap = new int[n][n];
+        int[][] intMap = new int[n][m];
         for (int i = 0; i < n; i++) {
-            intMap[i] = Map.getMapLineAsArray(bufferedReader, n);
+            intMap[i] = Map.getMapLineAsArray(bufferedReader, m);
         }
 //        读入map完成
-        Map map1 = new Map(n, intMap);
+        Map map1 = new Map(n, m, intMap);
 //        创建对象数组完成
         map1.printMap();
 
@@ -142,10 +143,26 @@ class Moveable extends HasIndexIJ {
         return null;
     }
 
+    public boolean checkDest(Map m, int i, int j) {
+        int[][] dijs = m.getDestsIJ();
+        for (int[] dij : dijs) {
+            if (Arrays.equals(dij, new int[]{i, j})) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void move(Map m, char direction) {
         int[] ij = getIJ();
         int i = ij[0], j = ij[1];
+//   2018-03-22   改成允许人移动到终点，人离开以后还要返回dest
+        int[][] dijs = m.getDestsIJ();
         m.getMap()[i][j] = new Floor();
+        if (checkDest(m,i,j)){
+            m.getMap()[i][j] = new Dest();
+        }
+
         switch (direction) {
             case 'w':
                 this.setI(i - 1);
@@ -247,6 +264,7 @@ class Dest extends Floor {
 class Map {
     private HasIndexIJ[][] map;
     private int n;
+    private int m;
     private Person person;
     private ArrayList<Box> boxes = new ArrayList<>(n);
     private ArrayList<Dest> dests = new ArrayList<>(n);
@@ -273,10 +291,11 @@ class Map {
         return bijs;
     }
 
-    public Map(int n0, int[][] intMap) {
-        this.map = new HasIndexIJ[n0][n0];
+    public Map(int n0, int m0, int[][] intMap) {
+        this.map = new HasIndexIJ[n0][m0];
         setN(n0);
-        setMap(intMap, n0);
+        setM(m0);
+        setMap(intMap, n0, m0);
     }
 
     void appendBox(Box box, Box[] boxes) {
@@ -288,8 +307,16 @@ class Map {
         this.n = n;
     }
 
+    public void setM(int m) {
+        this.m = m;
+    }
+
     public int getN() {
         return n;
+    }
+
+    public int getM() {
+        return m;
     }
 
     public static int[] stringArray2IntArray(String[] spliteStr, int n) {
@@ -307,7 +334,7 @@ class Map {
         return stringArray2IntArray(spliteStr, n);
     }
 
-    public static int[] getMapLineAsArray(BufferedReader bufferedReader, int n) throws IOException {
+    public static int[] getMapLineAsArray(BufferedReader bufferedReader, int m) throws IOException {
         String str = bufferedReader.readLine();
 //        char[] spliteStr = str.toCharArray();
 //        int[] array = new int[n];
@@ -316,7 +343,7 @@ class Map {
 //        }
 //        return array;
         String[] spliteStr = str.split("");
-        return stringArray2IntArray(spliteStr, n);
+        return stringArray2IntArray(spliteStr, m);
     }
 
     public HasIndexIJ getObj(int i) {
@@ -354,9 +381,9 @@ class Map {
         return true;
     }
 
-    private void setMap(int[][] intMap, int n0) {
+    private void setMap(int[][] intMap, int n0, int m0) {
         for (int i = 0; i < n0; i++) {
-            for (int j = 0; j < n0; j++) {
+            for (int j = 0; j < m0; j++) {
                 this.map[i][j] = getObj(intMap[i][j]);
                 this.map[i][j].setI(i);
                 this.map[i][j].setJ(j);
@@ -372,8 +399,9 @@ class Map {
 
     void printMap() {
         int n = this.getN();
+        int m = this.getM();
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
+            for (int j = 0; j < m; j++) {
                 System.out.print(this.getMap()[i][j].obj2Int() + "\t");
             }
             System.out.println();
