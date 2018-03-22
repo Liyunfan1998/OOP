@@ -1,8 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by luke1998 on 2018/3/19.
@@ -37,14 +36,28 @@ public class Movebox {
     }
 
     public boolean checkWin(Map m) {
-        int x = m.getBoxesIJ().length;
-        for (int i = 0; i < x; i++) {
-            int di = m.getBoxesIJ()[i][0] - m.getDestsIJ()[i][0];
-            int dj = m.getBoxesIJ()[i][1] - m.getDestsIJ()[i][1];
-            boolean tmp = (di == 0 && dj == 0);
-            if (!tmp) return false;
+        List<int[]> bij = new ArrayList(Arrays.asList(m.getBoxesIJ()));
+        int x = bij.size();
+        List<int[]> dij = new ArrayList(Arrays.asList(m.getDestsIJ()));
+
+        Iterator<int[]> iterator = bij.iterator();
+        while (iterator.hasNext()) {
+            int[] nextbij = iterator.next();
+            for (int[] dd : dij) {
+                if (Arrays.equals(nextbij, dd)) {
+                    iterator.remove();
+                }
+            }
         }
-        return true;
+        return bij.size() == 0;
+
+//        for (int i = 0; i < x; i++) {
+//            int di = bij.get(i)[0] - dij.get(i)[0];
+//            int dj = bij.get(i)[1] - dij.get(i)[1];
+//            boolean tmp = (di == 0 && dj == 0);
+//            if (!tmp) return false;
+//        }
+//        return true;
     }
 
     private static boolean isSubstring(String str, String target) {
@@ -192,15 +205,16 @@ class Coverable extends HasIndexIJ {
 }
 
 class Box extends Moveable {
-    Box(){
+    Box() {
         this.setSyb(3);
     }
 }
 
 class Person extends Moveable {
-    Person(){
+    Person() {
         this.setSyb(5);
     }
+
     public boolean checkBox(Map m, char direction) {//Box is in front of person
         return getFrontObj(m, direction) instanceof Box;
     }
@@ -211,19 +225,19 @@ class Person extends Moveable {
 }
 
 class Wall extends HasIndexIJ {
-    Wall(){
+    Wall() {
         this.setSyb(1);
     }
 }
 
 class Floor extends Coverable {
-    Floor(){
+    Floor() {
         this.setSyb(2);
     }
 }
 
 class Dest extends Floor {
-    Dest(){
+    Dest() {
         this.setSyb(4);
     }
 }
