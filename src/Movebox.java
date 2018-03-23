@@ -6,8 +6,8 @@ import java.util.*;
 /**
  * Created by luke1998 on 2018/3/19.
  * 2018-03-20   还有一个box不能覆盖box的检查没做
- * 2018-03-22   现在做的map都是n*n，要改成n*m
- * 2018-03-22   改成允许人移动到终点，人离开以后还要返回dest
+ * 2018-03-22   现在做的map都是n*n，要改成n*m （OK）
+ * 2018-03-22   改成允许人移动到终点，人离开以后还要返回dest （OK）
  */
 public class Movebox {
 
@@ -102,7 +102,10 @@ public class Movebox {
             boolean pb = p.checkBox(m, direction);
             if (pb) {
                 Box b = p.getFrontBox(m, direction);
-
+                if (b.checkBox(m, direction)) {
+                    System.out.println("Cannot Move Two Boxes At One Time");
+                    return;
+                }
                 boolean bw = b.checkWall(m, direction);
                 if (!bw) {
                     b.move(m, direction);
@@ -116,15 +119,41 @@ public class Movebox {
         } else
             System.out.println("Moving Error");
     }
+/*
+    private void go(Map m, char direction, Box box) {
+        if (!box.checkWall(m, direction)) {
+            boolean bb = box.checkBox(m, direction);
+            if (bb) {
+                Box b = box.getFrontBox(m, direction);
+                if (b.checkBox(m, direction)) {
+                    go(m, direction, b);
+                }
+                boolean bw = b.checkWall(m, direction);
+                if (!bw) {
+                    b.move(m, direction);
+                    box.move(m, direction);
+                } else {
+                    System.out.println("No Real Move");
+                }
+            } else {
+                box.move(m, direction);
+            }
+        } else
+            System.out.println("Moving Error");
+    }
+*/
 
     private void doInstruction(Map m, char direction) {
-
     }
 }
 
 class Moveable extends HasIndexIJ {
     public boolean checkWall(Map m, char direction) {//Wall is in front of box
         return getFrontObj(m, direction) instanceof Wall;
+    }
+
+    public boolean checkBox(Map m, char direction) {//Box is in front of person
+        return getFrontObj(m, direction) instanceof Box;
     }
 
     public HasIndexIJ getFrontObj(Map m, char direction) {
@@ -143,6 +172,11 @@ class Moveable extends HasIndexIJ {
         return null;
     }
 
+    public Box getFrontBox(Map m, char direction) {
+        return (Box) getFrontObj(m, direction);
+    }
+
+
     public boolean checkDest(Map m, int i, int j) {
         int[][] dijs = m.getDestsIJ();
         for (int[] dij : dijs) {
@@ -159,7 +193,7 @@ class Moveable extends HasIndexIJ {
 //   2018-03-22   改成允许人移动到终点，人离开以后还要返回dest
         int[][] dijs = m.getDestsIJ();
         m.getMap()[i][j] = new Floor();
-        if (checkDest(m,i,j)){
+        if (checkDest(m, i, j)) {
             m.getMap()[i][j] = new Dest();
         }
 
@@ -232,14 +266,6 @@ class Box extends Moveable {
 class Person extends Moveable {
     Person() {
         this.setSyb(5);
-    }
-
-    public boolean checkBox(Map m, char direction) {//Box is in front of person
-        return getFrontObj(m, direction) instanceof Box;
-    }
-
-    public Box getFrontBox(Map m, char direction) {
-        return (Box) getFrontObj(m, direction);
     }
 }
 
